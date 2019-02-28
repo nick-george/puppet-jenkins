@@ -6,7 +6,7 @@ describe 'jenkins_credentials' do
   context 'ensure =>' do
     context 'present' do
       context 'UsernamePasswordCredentialsImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
           pp = base_manifest + <<-EOS
             jenkins_credentials { '9b07d668-a87e-4877-9407-ae05056e32ac':
               ensure      => 'present',
@@ -19,19 +19,20 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should contain '<id>9b07d668-a87e-4877-9407-ae05056e32ac</id>' }
+          it { is_expected.to contain '<id>9b07d668-a87e-4877-9407-ae05056e32ac</id>' }
         end
       end
 
       context 'ConduitCredentialsImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
           pending('puppet_helper.groovy implementation missing, see https://github.com/jenkinsci/puppet-jenkins/issues/753')
           pp = base_manifest + <<-EOS
             jenkins_credentials { '002224bd-60cb-49f3-a314-d0f73f82233d':
@@ -44,22 +45,23 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
+
         # XXX need to properly compare the XML doc
         # trying to match anything other than the id this way might match other
         # credentials
         describe file('/var/lib/jenkins/credentials.xml') do
           it {
             pending('puppet_helper.groovy implementation missing, see https://github.com/jenkinsci/puppet-jenkins/issues/753')
-            should contain '<id>002224bd-60cb-49f3-a314-d0f73f82233d</id>'
+            is_expected.to contain '<id>002224bd-60cb-49f3-a314-d0f73f82233d</id>'
           }
         end
       end
 
-
       context 'BasicSSHUserPrivateKey' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
           pp = base_manifest + <<-EOS
             jenkins::plugin { 'ssh-credentials': }
 
@@ -75,19 +77,20 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should contain '<id>a0469025-1202-4007-983d-0c62f230f1a7</id>' }
+          it { is_expected.to contain '<id>a0469025-1202-4007-983d-0c62f230f1a7</id>' }
         end
       end
 
       context 'StringCredentialsImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
           pp = base_manifest + <<-EOS
             jenkins::plugin { 'plain-credentials':
               pin => true,
@@ -103,19 +106,20 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should contain '<id>150b2895-b0eb-4813-b8a5-3779690c063c</id>' }
+          it { is_expected.to contain '<id>150b2895-b0eb-4813-b8a5-3779690c063c</id>' }
         end
       end
 
       context 'FileCredentialsImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
           pp = base_manifest + <<-EOS
             jenkins::plugin { 'plain-credentials':
               pin => true,
@@ -132,19 +136,21 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should contain '<id>95bfe159-8bf0-4605-be20-47e201220e7c</id>' }
+          it { is_expected.to contain '<id>95bfe159-8bf0-4605-be20-47e201220e7c</id>' }
         end
       end
 
       context 'AWSCredentialsImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
+          pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
           pp = base_manifest + <<-EOS
             jenkins::plugin { [
               'jackson2-api',
@@ -165,25 +171,31 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should contain '<id>34d75c64-61ff-4a28-bd40-cac3aafc7e3a</id>' }
+          it {
+            pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+            is_expected.to contain '<id>34d75c64-61ff-4a28-bd40-cac3aafc7e3a</id>'
+          }
         end
       end
 
       context 'GitLabApiTokenImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
+          pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
           pp = base_manifest + <<-EOS
             package { 'git': }
             jenkins::plugin { [
               'matrix-project',
               'junit',
               'script-security',
+              'workflow-api',
               'workflow-step-api',
               'workflow-scm-step',
               'git',
@@ -205,21 +217,134 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should contain '<id>7e86e9fb-a8af-480f-b596-7191dc02bf38</id>' }
+          it {
+            pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+            is_expected.to contain '<id>7e86e9fb-a8af-480f-b596-7191dc02bf38</id>'
+          }
+        end
+      end
+
+      context 'GoogleRobotPrivateKeyCredentials with json_key' do
+        it 'works with no errors and idempotently' do
+          pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+          pp = base_manifest + <<-EOS
+            jenkins::plugin { [
+              'google-oauth-plugin',
+              'credentials',
+              'structs',
+              'oauth-credentials',
+            ]: }
+
+            jenkins_credentials { '587690b0-f793-44e6-bc46-889cce58fb71':
+              ensure   => 'present',
+              impl     => 'GoogleRobotPrivateKeyCredentials',
+              json_key => @(END)
+              {
+                "client_email": "random@developer.gserviceaccount.com",
+                "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+              }
+              | END,
+            }
+          EOS
+
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
+        end
+
+        describe file('/var/lib/jenkins/credentials.xml') do
+          # XXX need to properly compare the XML doc
+          # trying to match anything other than the id this way might match other
+          # credentails
+          it {
+            pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+            is_expected.to contain '<projectId>587690b0-f793-44e6-bc46-889cce58fb71</projectId>'
+          }
+        end
+      end
+
+      context 'GoogleRobotPrivateKeyCredentials with email_address and p12_key' do
+        it 'works with no errors and idempotently' do
+          pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+          pp = base_manifest + <<-EOS
+            jenkins::plugin { [
+              'google-oauth-plugin',
+              'credentials',
+              'structs',
+              'oauth-credentials',
+            ]: }
+
+            jenkins_credentials { '2f867d0d-e0c7-48a6-a355-1d4fd2ac6c22':
+              ensure        => 'present',
+              impl          => 'GoogleRobotPrivateKeyCredentials',
+              email_address => 'random@developer.gserviceaccount.com',
+              p12_key       => 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg==',
+            }
+          EOS
+
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
+        end
+
+        describe file('/var/lib/jenkins/credentials.xml') do
+          # XXX need to properly compare the XML doc
+          # trying to match anything other than the id this way might match other
+          # credentails
+          it {
+            pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+            is_expected.to contain '<projectId>2f867d0d-e0c7-48a6-a355-1d4fd2ac6c22</projectId>'
+          }
+        end
+      end
+
+      context 'BrowserStackCredentials' do
+        it 'works with no errors and idempotently' do
+          pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+          pp = base_manifest + <<-EOS
+            jenkins::plugin { [
+              'jackson2-api',
+              'credentials-binding',
+              'workflow-step-api',
+              'ssh-credentials',
+              'plain-credentials',
+              'browserstack-integration'
+            ]: }
+
+            jenkins_credentials { '562fa23d-a441-4cab-997f-58df6e245813'
+              ensure      => 'present',
+              description => 'browserstack credentials',
+              impl        => 'BrowserStackCredentials',
+              username    => 'whats this?',
+              secret_key  => 'you know I payed for this',
+            }
+          EOS
+
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
+        end
+
+        describe file('/var/lib/jenkins/credentials.xml') do
+          # XXX need to properly compare the XML doc
+          # trying to match anything other than the id this way might match other
+          # credentails
+          it {
+            pending('jenkins plugin tests are not consistently failing or succeeding: https://github.com/voxpupuli/puppet-jenkins/issues/839')
+            is_expected.to contain '<id>562fa23d-a441-4cab-997f-58df6e245813</id>'
+          }
         end
       end
     end # 'present' do
 
     context 'absent' do
       context 'StringCredentialsImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
           pp = base_manifest + <<-EOS
             jenkins::plugin { 'plain-credentials': }
 
@@ -233,19 +358,20 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should_not contain '<id>150b2895-b0eb-4813-b8a5-3779690c063c</id>' }
+          it { is_expected.not_to contain '<id>150b2895-b0eb-4813-b8a5-3779690c063c</id>' }
         end
       end
 
       context 'FileCredentialsImpl' do
-        it 'should work with no errors' do
+        it 'works with no errors and idempotently' do
           pp = base_manifest + <<-EOS
             jenkins::plugin { 'plain-credentials':
               pin => true,
@@ -262,14 +388,15 @@ describe 'jenkins_credentials' do
             }
           EOS
 
-          apply2(pp)
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
         end
 
         describe file('/var/lib/jenkins/credentials.xml') do
           # XXX need to properly compare the XML doc
           # trying to match anything other than the id this way might match other
           # credentails
-          it { should_not contain '<id>95bfe159-8bf0-4605-be20-47e201220e7</id>' }
+          it { is_expected.not_to contain '<id>95bfe159-8bf0-4605-be20-47e201220e7</id>' }
         end
       end
     end # 'absent' do

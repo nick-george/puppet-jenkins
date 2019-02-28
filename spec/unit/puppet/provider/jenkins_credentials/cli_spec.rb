@@ -59,10 +59,34 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
             "impl": "GitLabApiTokenImpl",
             "description": "GitLab API token",
             "api_token": "tokens for days"
+        },
+        {
+          "id": "587690b0-f793-44e6-bc46-889cce58fb71",
+          "domain": null,
+          "scope": null,
+          "impl": "GoogleRobotPrivateKeyCredentials",
+          "json_key": "{\\\"client_email\\\":\\\"random@developer.gserviceaccount.com\\\",\\\"private_key\\\":\\\"-----BEGIN PRIVATE KEY-----\\\\n...\\\\n-----END PRIVATE KEY-----\\\\n\\\"}"
+        },
+        {
+          "id": "2f867d0d-e0c7-48a6-a355-1d4fd2ac6c22",
+          "domain": null,
+          "scope": null,
+          "impl": "GoogleRobotPrivateKeyCredentials",
+          "email_address": "random@developer.gserviceaccount.com",
+          "p12_key": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg=="
+        },
+        {
+          "id": "562fa23d-a441-4cab-997f-58df6e245813",
+          "domain": null,
+          "scope": null,
+          "impl": "BrowserStackCredentials",
+          "username": "whats this?",
+          "access_key": "you know I payed for this"
         }
     ]
     EOS
   end
+
   let(:credentials) { JSON.parse(credentials_list_json_raw) }
 
   shared_examples 'a provider from example hash 1' do
@@ -71,27 +95,30 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
 
       expect(provider.name).to eq cred['id']
       expect(provider.ensure).to eq :present
-      [
-        'domain',
-        'scope',
-        'impl',
-        'description',
-        'username',
-        'password',
+      %w[
+        domain
+        scope
+        impl
+        description
+        username
+        password
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
       end
 
-      [
-        'private_key',
-        'passphrase',
-        'secret',
-        'file_name',
-        'content',
-        'source',
-        'key_store_impl',
-        'secret_key',
-        'access_key',
+      %w[
+        private_key
+        passphrase
+        secret
+        file_name
+        content
+        source
+        key_store_impl
+        secret_key
+        access_key
+        email_address
+        p12_key
+        json_key
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq :absent
       end
@@ -104,31 +131,33 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
 
       expect(provider.name).to eq cred['id']
       expect(provider.ensure).to eq :present
-      [
-        'domain',
-        'scope',
-        'impl',
-        'description',
-        'username',
-        'private_key',
-        'passphrase',
+      %w[
+        domain
+        scope
+        impl
+        description
+        username
+        private_key
+        passphrase
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
       end
 
-      [
-        'password',
-        'secret',
-        'file_name',
-        'content',
-        'source',
-        'key_store_impl',
-        'secret_key',
-        'access_key',
+      %w[
+        password
+        secret
+        file_name
+        content
+        source
+        key_store_impl
+        secret_key
+        access_key
+        email_address
+        p12_key
+        json_key
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq :absent
       end
-
     end
   end
 
@@ -138,27 +167,30 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
 
       expect(provider.name).to eq cred['id']
       expect(provider.ensure).to eq :present
-      [
-        'domain',
-        'scope',
-        'impl',
-        'description',
-        'secret',
+      %w[
+        domain
+        scope
+        impl
+        description
+        secret
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
       end
 
-      [
-        'username',
-        'password',
-        'private_key',
-        'passphrase',
-        'file_name',
-        'content',
-        'source',
-        'key_store_impl',
-        'secret_key',
-        'access_key',
+      %w[
+        username
+        password
+        private_key
+        passphrase
+        file_name
+        content
+        source
+        key_store_impl
+        secret_key
+        access_key
+        email_address
+        p12_key
+        json_key
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq :absent
       end
@@ -171,27 +203,30 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
 
       expect(provider.name).to eq cred['id']
       expect(provider.ensure).to eq :present
-      [
-        'domain',
-        'scope',
-        'impl',
-        'description',
-        'secret',
-        'file_name',
-        'content',
+      %w[
+        domain
+        scope
+        impl
+        description
+        secret
+        file_name
+        content
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
       end
 
-      [
-        'username',
-        'password',
-        'private_key',
-        'passphrase',
-        'source',
-        'key_store_impl',
-        'secret_key',
-        'access_key',
+      %w[
+        username
+        password
+        private_key
+        passphrase
+        source
+        key_store_impl
+        secret_key
+        access_key
+        email_address
+        p12_key
+        json_key
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq :absent
       end
@@ -204,26 +239,29 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
 
       expect(provider.name).to eq cred['id']
       expect(provider.ensure).to eq :present
-      [
-        'domain',
-        'scope',
-        'impl',
-        'description',
-        'secret_key',
-        'access_key',
+      %w[
+        domain
+        scope
+        impl
+        description
+        secret_key
+        access_key
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
       end
 
-      [
-        'username',
-        'password',
-        'private_key',
-        'passphrase',
-        'source',
-        'key_store_impl',
-        'content',
-        'file_name'
+      %w[
+        username
+        password
+        private_key
+        passphrase
+        source
+        key_store_impl
+        content
+        file_name
+        email_address
+        p12_key
+        json_key
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq :absent
       end
@@ -236,27 +274,129 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
 
       expect(provider.name).to eq cred['id']
       expect(provider.ensure).to eq :present
-      [
-        'domain',
-        'scope',
-        'impl',
-        'description',
-        'api_token',
+      %w[
+        domain
+        scope
+        impl
+        description
+        api_token
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
       end
 
-      [
-        'username',
-        'password',
-        'private_key',
-        'passphrase',
-        'source',
-        'key_store_impl',
-        'content',
-        'file_name',
-        'secret_key',
-        'access_key',
+      %w[
+        username
+        password
+        private_key
+        passphrase
+        source
+        key_store_impl
+        content
+        file_name
+        secret_key
+        access_key
+        email_address
+        p12_key
+        json_key
+      ].each do |k|
+        expect(provider.public_send(k.to_sym)).to eq :absent
+      end
+    end
+  end
+
+  shared_examples 'a provider from example hash 7' do
+    it do
+      cred = credentials[5]
+
+      expect(provider.name).to eq cred['id']
+      expect(provider.ensure).to eq :present
+      %w[
+        domain
+        scope
+        impl
+        json_key
+      ].each do |k|
+        expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
+      end
+
+      %w[
+        username
+        password
+        private_key
+        passphrase
+        source
+        key_store_impl
+        content
+        file_name
+        secret_key
+        access_key
+      ].each do |k|
+        expect(provider.public_send(k.to_sym)).to eq :absent
+      end
+    end
+  end
+
+  shared_examples 'a provider from example hash 8' do
+    it do
+      cred = credentials[5]
+
+      expect(provider.name).to eq cred['id']
+      expect(provider.ensure).to eq :present
+      %w[
+        domain
+        scope
+        impl
+        email_address
+        p12_key
+      ].each do |k|
+        expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
+      end
+
+      %w[
+        username
+        password
+        private_key
+        passphrase
+        source
+        key_store_impl
+        content
+        file_name
+        secret_key
+        access_key
+      ].each do |k|
+        expect(provider.public_send(k.to_sym)).to eq :absent
+      end
+    end
+  end
+
+  shared_examples 'a provider from example hash 9' do
+    it do
+      cred = credentials[8]
+
+      expect(provider.name).to eq cred['id']
+      expect(provider.ensure).to eq :present
+      %w[
+        domain
+        scope
+        impl
+        username
+        access_key
+      ].each do |k|
+        expect(provider.public_send(k.to_sym)).to eq cred[k].nil? ? :undef : cred[k]
+      end
+
+      %w[
+        password
+        private_key
+        passphrase
+        source
+        key_store_impl
+        content
+        file_name
+        secret_key
+        email_address
+        p12_key
+        json_key
       ].each do |k|
         expect(provider.public_send(k.to_sym)).to eq :absent
       end
@@ -272,8 +412,8 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
           with(nil) { credentials }
       end
 
-      it 'should return the correct number of instances' do
-        expect(described_class.instances.size).to eq 6
+      it 'returns the correct number of instances' do
+        expect(described_class.instances.size).to eq credentials.size
       end
 
       context 'first instance returned' do
@@ -302,7 +442,7 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
     end
 
     context 'when called with a catalog param' do
-      it 'should pass it on ::credentials_list_json' do
+      it 'passes it on ::credentials_list_json' do
         catalog = Puppet::Resource::Catalog.new
 
         expect(described_class).to receive(:credentials_list_json).
@@ -314,7 +454,7 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
   end # ::instanes
 
   describe '#flush' do
-    it 'should call credentials_update' do
+    it 'calls credentials_update' do
       provider = described_class.new
       provider.create
 
@@ -322,7 +462,7 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
       provider.flush
     end
 
-    it 'should call credentials_delete_id' do
+    it 'calls credentials_delete_id' do
       provider = described_class.new
       provider.destroy
 
@@ -330,7 +470,7 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
       provider.flush
     end
 
-    it 'should call credentials_delete_id' do
+    it 'calls credentials_delete_id' do
       provider = described_class.new
 
       expect(provider).to receive(:credentials_delete_id)
@@ -377,7 +517,7 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
     it do
       expect(described_class).to receive(:clihelper).with(
         ['credentials_list_json'],
-        {:catalog => nil}
+        catalog: nil
       ) { JSON.pretty_generate(credentials[0]) }
 
       raw = described_class.send :credentials_list_json
@@ -395,7 +535,7 @@ describe Puppet::Type.type(:jenkins_credentials).provider(:cli) do
 
       expect(described_class).to receive(:clihelper).with(
         ['credentials_update_json'],
-        {:stdinjson => credentials[0]},
+        stdinjson: credentials[0]
       )
 
       provider.send :credentials_update_json

@@ -1,4 +1,4 @@
-require_relative  '../../puppet/x/jenkins/type/cli'
+require_relative '../../puppet/x/jenkins/type/cli'
 
 Puppet::X::Jenkins::Type::Cli.newtype(:jenkins_credentials) do
   @doc = <<-EOS
@@ -36,7 +36,9 @@ Puppet::X::Jenkins::Type::Cli.newtype(:jenkins_credentials) do
               :StringCredentialsImpl,
               :FileCredentialsImpl,
               :AWSCredentialsImpl,
-              :GitLabApiTokenImpl)
+              :GitLabApiTokenImpl,
+              :GoogleRobotPrivateKeyCredentials,
+              :BrowserStackCredentials)
   end
 
   newproperty(:description) do
@@ -45,7 +47,7 @@ Puppet::X::Jenkins::Type::Cli.newtype(:jenkins_credentials) do
   end
 
   newproperty(:username) do
-    desc 'username for credentials - UsernamePasswordCredentialsImpl, CertificateCredentialsImpl'
+    desc 'username for credentials - UsernamePasswordCredentialsImpl, CertificateCredentialsImpl, BrowserStackCredentials'
   end
 
   newproperty(:password) do
@@ -57,7 +59,7 @@ Puppet::X::Jenkins::Type::Cli.newtype(:jenkins_credentials) do
   end
 
   newproperty(:access_key) do
-    desc 'AWS access key - AWSCredentialsImpl'
+    desc 'AWS access key - AWSCredentialsImpl, BrowserStackCredentials'
   end
 
   newproperty(:secret_key) do
@@ -100,14 +102,26 @@ Puppet::X::Jenkins::Type::Cli.newtype(:jenkins_credentials) do
     desc 'URL of phabriactor installation - ConduitCredentialsImpl'
   end
 
+  newproperty(:json_key) do
+    desc 'Prettified JSON key string - GoogleRobotPrivateKeyCredentials'
+  end
+
+  newproperty(:email_address) do
+    desc 'Email address used with a P12 key - GoogleRobotPrivateKeyCredentials'
+  end
+
+  newproperty(:p12_key) do
+    desc 'P12 key string in Base64 format without line wrapping - GoogleRobotPrivateKeyCredentials'
+  end
+
   # require all authentication & authorization related types
   [
     :jenkins_user,
     :jenkins_security_realm,
-    :jenkins_authorization_strategy,
+    :jenkins_authorization_strategy
   ].each do |type|
     autorequire(type) do
-      catalog.resources.find_all do |r|
+      catalog.resources.select do |r|
         r.is_a?(Puppet::Type.type(type))
       end
     end

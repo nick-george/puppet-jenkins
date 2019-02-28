@@ -1,6 +1,6 @@
 require 'spec_helper_acceptance'
 
-describe 'jenkins class', :order => :defined do
+describe 'jenkins class', order: :defined do
   $pdir = '/var/lib/jenkins/plugins'
   let(:pdir) { $pdir }
 
@@ -11,20 +11,20 @@ describe 'jenkins class', :order => :defined do
     "#{$pdir}/c.txt",
     "#{$pdir}/a/foo",
     "#{$pdir}/b/bar",
-    "#{$pdir}/c/baz",
+    "#{$pdir}/c/baz"
   ]
   $dirs = [
     "#{$pdir}/a",
     "#{$pdir}/b",
-    "#{$pdir}/c",
+    "#{$pdir}/c"
   ]
 
   shared_examples 'has_git_plugin' do
     describe file("#{$pdir}/git.hpi") do
-      it { should be_file }
+      it { is_expected.to be_file }
     end
     describe file("#{$pdir}/git") do
-      it { should be_directory }
+      it { is_expected.to be_directory }
     end
   end
 
@@ -39,24 +39,21 @@ describe 'jenkins class', :order => :defined do
   end
 
   context 'default parameters' do
-    it 'should work with no errors' do
-      pp = <<-EOS
-      class {'jenkins':
-        cli_remoting_free => true,
-      }
+    pp = <<-EOS
+    class {'jenkins':
+      cli_remoting_free => true,
+    }
 
-      jenkins::plugin {'git-plugin':
-        name    => 'git',
-        version => '2.3.4',
-      }
-      EOS
+    jenkins::plugin {'git-plugin':
+      name    => 'git',
+      version => '2.3.4',
+    }
+    EOS
 
-      apply2(pp)
-    end
+    apply2(pp)
 
     it_behaves_like 'has_git_plugin'
   end
-
 
   describe 'plugin downgrade' do
     before(:all) do
@@ -71,28 +68,36 @@ describe 'jenkins class', :order => :defined do
         version => '2.3.4',
       }
       EOS
-      apply2(pp)
+
+      apply(pp, catch_failures: true)
+      apply(pp, catch_changes: true)
     end
 
     context 'downgrade' do
       git_version =
-      it 'should downgrade git version' do
-        pp = <<-EOS
-        class {'jenkins':
-          cli_remoting_free => true,
-          purge_plugins     => true,
-        }
+        it 'downgrades git version' do
+          pp = <<-EOS
+          package{'unzip':
+            ensure => present
+          }
+          class {'jenkins':
+            cli_remoting_free => true,
+            purge_plugins     => true,
+          }
 
-        jenkins::plugin {'git-plugin':
-          name    => 'git',
-          version => '1.0',
-        }
-        EOS
-        apply2(pp)
-        # Find the version of the installed git plugin
-        git_version = shell("unzip -p #{$pdir}/git.hpi META-INF/MANIFEST.MF | sed 's/Plugin-Version: \\\(.*\\\)/\\1/;tx;d;:x'").stdout.strip
-        git_version.should eq('1.0')
-      end
+          jenkins::plugin {'git-plugin':
+            name    => 'git',
+            version => '1.0',
+          }
+          EOS
+
+          apply(pp, catch_failures: true)
+          apply(pp, catch_changes: true)
+
+          # Find the version of the installed git plugin
+          git_version = shell("unzip -p #{$pdir}/git.hpi META-INF/MANIFEST.MF | sed 's/Plugin-Version: \\\(.*\\\)/\\1/;tx;d;:x'").stdout.strip
+          git_version.should eq('1.0')
+        end
       it_behaves_like 'has_git_plugin'
     end
   end
@@ -101,7 +106,7 @@ describe 'jenkins class', :order => :defined do
     context 'true' do
       include_context 'plugin_test_files'
 
-      it 'should work with no errors' do
+      it 'works with no errors' do
         pp = <<-EOS
         class {'jenkins':
           cli_remoting_free => true,
@@ -114,14 +119,15 @@ describe 'jenkins class', :order => :defined do
         }
         EOS
 
-        apply2(pp)
+        apply(pp, catch_failures: true)
+        apply(pp, catch_changes: true)
       end
 
       it_behaves_like 'has_git_plugin'
 
       ($dirs + $files).each do |f|
         describe file(f) do
-          it { should_not exist }
+          it { is_expected.not_to exist }
         end
       end
     end # true
@@ -129,7 +135,7 @@ describe 'jenkins class', :order => :defined do
     context 'false' do
       include_context 'plugin_test_files'
 
-      it 'should work with no errors' do
+      it 'works with no errors' do
         pp = <<-EOS
         class {'jenkins':
           cli_remoting_free => true,
@@ -142,20 +148,21 @@ describe 'jenkins class', :order => :defined do
         }
         EOS
 
-        apply2(pp)
+        apply(pp, catch_failures: true)
+        apply(pp, catch_changes: true)
       end
 
       it_behaves_like 'has_git_plugin'
 
       $dirs.each do |f|
         describe file(f) do
-          it { should be_directory }
+          it { is_expected.to be_directory }
         end
       end
 
       $files.each do |f|
         describe file(f) do
-          it { should be_file }
+          it { is_expected.to be_file }
         end
       end
     end # false

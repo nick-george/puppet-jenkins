@@ -27,6 +27,11 @@
 # [*executors*]
 #   Number of executors for this slave.  (How many jenkins jobs can run simultaneously on this host.)
 #
+# [*tunnel*]
+#   Connect to the specified host and port, instead of connecting directly to Jenkins. Useful when connection to
+#   Hudson needs to be tunneled. Can be also HOST: or :PORT, in which case the missing portion will be
+#   auto-configured like the default behavior
+#
 # [*manage_slave_user*]
 #   Should the class add a user to run the slave code?  1 is currently true
 #   TODO: should be updated to use boolean.
@@ -82,13 +87,15 @@
 #   can be a String, or an Array.
 #
 # [*proxy_server*]
-#
 #   Serves the same function as `::jenkins::proxy_server` but is an independent
 #   parameter so the `::jenkins` class does not need to be the catalog for
 #   slave only nodes.
 #
 # [*swarm_client_args*]
 #   Swarm client arguments to add to slave command line. More info: https://github.com/jenkinsci/swarm-plugin/blob/master/client/src/main/java/hudson/plugins/swarm/Options.java
+#
+# [*java_cmd*]
+#   Path to the java command in ${defaults_location}/jenkins-slave. Defaults to '/usr/bin/java'
 #
 
 # === Examples
@@ -116,6 +123,7 @@ class jenkins::slave (
   Optional[String] $tool_locations        = undef,
   Optional[String] $source                = undef,
   Optional[String] $proxy_server          = undef,
+  Optional[Jenkins::Tunnel] $tunnel       = undef,
   String $version                         = $jenkins::params::swarm_version,
   Integer $executors                      = 2,
   Boolean $manage_slave_user              = true,
@@ -134,6 +142,7 @@ class jenkins::slave (
   Any $java_args                          = undef,
   Any $swarm_client_args                  = undef,
   Boolean $delete_existing_clients        = false,
+  Any $java_cmd                           = '/usr/bin/java',
 ) inherits jenkins::params {
 
   if versioncmp($version, '3.0') < 0 {
@@ -150,7 +159,7 @@ class jenkins::slave (
   $quoted_ui_pass = shellquote($ui_pass)
 
   if $labels {
-    if is_array($labels) {
+    if $labels =~ Array {
       $_combined_labels = hiera_array('jenkins::slave::labels', $labels)
       $_real_labels = join($_combined_labels, ' ')
     }
@@ -160,7 +169,7 @@ class jenkins::slave (
   }
 
   if $java_args {
-    if is_array($java_args) {
+    if $java_args =~ Array {
       $_combined_java_args = hiera_array('jenkins::slave::java_args', $java_args)
       $_real_java_args = join($_combined_java_args, ' ')
     }
@@ -170,7 +179,7 @@ class jenkins::slave (
   }
 
   if $swarm_client_args {
-    if is_array($swarm_client_args) {
+    if $swarm_client_args =~ Array {
       $_combined_swarm_client_args = hiera_array('jenkins::slave::swarm_client_args', $swarm_client_args)
       $_real_swarm_client_args = join($_combined_swarm_client_args, ' ')
     }
