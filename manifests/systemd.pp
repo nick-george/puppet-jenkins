@@ -7,12 +7,10 @@ define jenkins::systemd(
   Any $user,
   Any $libdir,
 ) {
-  if $caller_module_name != $module_name {
-    fail("Use of private class ${name} by ${caller_module_name}")
-  }
+  assert_private()
   $service = $name
 
-  include ::systemd
+  include systemd
 
   $sysv_init = "/etc/init.d/${service}"
 

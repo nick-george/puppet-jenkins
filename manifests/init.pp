@@ -324,16 +324,16 @@ class jenkins(
   Stdlib::Absolutepath $libdir                    = $jenkins::params::libdir,
   Stdlib::Absolutepath $sysconfdir                = $jenkins::params::sysconfdir,
   Boolean $manage_datadirs                        = $jenkins::params::manage_datadirs,
-  Stdlib::Absolutepath $localstatedir             = $::jenkins::params::localstatedir,
+  Stdlib::Absolutepath $localstatedir             = $jenkins::params::localstatedir,
   Optional[Integer] $executors                    = undef,
   Optional[Integer] $slaveagentport               = undef,
-  Boolean $manage_user                            = $::jenkins::params::manage_user,
-  String $user                                    = $::jenkins::params::user,
-  Boolean $manage_group                           = $::jenkins::params::manage_group,
-  String $group                                   = $::jenkins::params::group,
-  Array $default_plugins                          = $::jenkins::params::default_plugins,
-  String $default_plugins_host                    = $::jenkins::params::default_plugins_host,
-  Boolean $purge_plugins                          = $::jenkins::params::purge_plugins,
+  Boolean $manage_user                            = $jenkins::params::manage_user,
+  String $user                                    = $jenkins::params::user,
+  Boolean $manage_group                           = $jenkins::params::manage_group,
+  String $group                                   = $jenkins::params::group,
+  Array $default_plugins                          = $jenkins::params::default_plugins,
+  String $default_plugins_host                    = $jenkins::params::default_plugins_host,
+  Boolean $purge_plugins                          = $jenkins::params::purge_plugins,
 ) inherits jenkins::params {
 
   if $purge_plugins and ! $manage_datadirs {
@@ -418,11 +418,13 @@ class jenkins(
   $plugin_dir = "${localstatedir}/plugins"
   $job_dir = "${localstatedir}/jobs"
 
+  # lint:ignore:anchor_resource
   anchor {'jenkins::begin':}
   anchor {'jenkins::end':}
+  # lint:endignore
 
   if $install_java {
-    include ::java
+    include java
   }
 
   if $direct_download {
@@ -432,37 +434,47 @@ class jenkins(
     $jenkins_package_class = 'jenkins::package'
     if $repo {
       $repo_ = true
-      include ::jenkins::repo
+      include jenkins::repo
     } else {
       $repo_ = false
     }
   }
   include $jenkins_package_class
 
-  include ::jenkins::config
-  include ::jenkins::plugins
-  include ::jenkins::jobs
-  include ::jenkins::users
-  include ::jenkins::proxy
+  include jenkins::user_setup
+  include jenkins::config
+  include jenkins::plugins
+  include jenkins::jobs
+  include jenkins::users
+  include jenkins::proxy
 
   if $manage_service {
-    include ::jenkins::service
+    include jenkins::service
     if empty($default_plugins){
-      notice(sprintf('INFO: make sure you install the following plugins with your code using this module: %s',join($::jenkins::params::default_plugins,','))) # lint:ignore:140chars
+      notice(sprintf('INFO: make sure you install the following plugins with your code using this module: %s',join($jenkins::params::default_plugins,','))) # lint:ignore:140chars
+    }
+
+    if $service_provider == 'systemd' {
+      jenkins::systemd { 'jenkins':
+        user   => $user,
+        libdir => $libdir,
+      }
+
+      # jenkins::config manages the jenkins user resource, which is autorequired
+      # by the file resource for the run wrapper.
+      Class['jenkins::config']
+        -> Jenkins::Systemd['jenkins']
+          -> Anchor['jenkins::end']
     }
   }
 
-  if defined('::firewall') {
-    if $configure_firewall == undef {
-      fail('The firewall module is included in your manifests, please configure $configure_firewall in the jenkins module')
-    } elsif $configure_firewall {
-      include ::jenkins::firewall
-    }
+  if defined('::firewall') and $configure_firewall {
+    include jenkins::firewall
   }
 
   if $cli {
-    include ::jenkins::cli
-    include ::jenkins::cli_helper
+    include jenkins::cli
+    include jenkins::cli_helper
   }
 
   if $executors {
@@ -489,6 +501,7 @@ class jenkins(
 
   if $manage_service {
     Anchor['jenkins::begin']
+    -> Class['jenkins::user_setup']
       -> Class[$jenkins_package_class]
         -> Class['jenkins::config']
           -> Class['jenkins::plugins']
@@ -514,19 +527,6 @@ class jenkins(
   if ($configure_firewall and $manage_service) {
     Class['jenkins::service']
       -> Class['jenkins::firewall']
-        -> Anchor['jenkins::end']
-  }
-
-  if $service_provider == 'systemd' {
-    jenkins::systemd { 'jenkins':
-      user   => $user,
-      libdir => $libdir,
-    }
-
-    # jenkins::config manages the jenkins user resource, which is autorequired
-    # by the file resource for the run wrapper.
-    Class['jenkins::config']
-      -> Jenkins::Systemd['jenkins']
         -> Anchor['jenkins::end']
   }
 }

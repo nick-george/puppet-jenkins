@@ -71,7 +71,7 @@ and ssh key file, SSH authentication is preferred.
 
 ## Getting Started
 ```bash
-puppet module install rtyler/jenkins
+puppet module install puppet/jenkins
 ```
 
 ```puppet
@@ -369,7 +369,7 @@ You can also specify a UUID to use with the credentials, which will be used to
 identify the credentials from within the job config. This is necessary when setting
 credentials for use with the [git plugin](http://docs.openstack.org/infra/jenkins-job-builder/scm.html#scm.git), for example.
 
-You can either manually generate a UUID from a site like https://www.uuidgenerator.net,
+You can either manually generate a UUID from a site like [UUIDTools.com](https://www.uuidtools.com/generate/v4),
 or use the UUID from an existing user, which is accessible within the URL of the
 Jenkins console when managing an existing user's credentials.
 
@@ -399,7 +399,7 @@ If you use [librarian-puppet](https://github.com/rodjek/librarian-puppet), add
 the following to your `Puppetfile`:
 
 ```ruby
-mod "rtyler/jenkins"
+mod "puppet/jenkins"
 ```
 
 ### With the "puppet module" tool
@@ -410,7 +410,7 @@ allowing you to easily install the released version of the module
 
 To quickly try this module with the puppet module tool:
 
-    % sudo puppet module install rtyler/jenkins
+    % sudo puppet module install puppet/jenkins
     % sudo puppet apply -v -e 'include jenkins'
     info: Loading facts in facter_dot_d
     info: Loading facts in facter_dot_d

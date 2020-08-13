@@ -238,8 +238,6 @@ describe 'jenkins_credentials' do
           pp = base_manifest + <<-EOS
             jenkins::plugin { [
               'google-oauth-plugin',
-              'credentials',
-              'structs',
               'oauth-credentials',
             ]: }
 
@@ -251,7 +249,8 @@ describe 'jenkins_credentials' do
                 "client_email": "random@developer.gserviceaccount.com",
                 "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
               }
-              | END,
+              | END
+              ,
             }
           EOS
 
@@ -276,8 +275,6 @@ describe 'jenkins_credentials' do
           pp = base_manifest + <<-EOS
             jenkins::plugin { [
               'google-oauth-plugin',
-              'credentials',
-              'structs',
               'oauth-credentials',
             ]: }
 
@@ -317,7 +314,7 @@ describe 'jenkins_credentials' do
               'browserstack-integration'
             ]: }
 
-            jenkins_credentials { '562fa23d-a441-4cab-997f-58df6e245813'
+            jenkins_credentials { '562fa23d-a441-4cab-997f-58df6e245813':
               ensure      => 'present',
               description => 'browserstack credentials',
               impl        => 'BrowserStackCredentials',

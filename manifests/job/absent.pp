@@ -16,14 +16,14 @@ define jenkins::job::absent(
   String $jobname = $title,
 ){
 
-  include ::jenkins::cli
+  include jenkins::cli
 
   if $jenkins::service_ensure == 'stopped' or $jenkins::service_ensure == false {
     fail('Management of Jenkins jobs requires \$jenkins::service_ensure to be set to \'running\'')
   }
 
   $tmp_config_path  = "/tmp/${jobname}-config.xml"
-  $job_dir          = "${::jenkins::job_dir}/${jobname}"
+  $job_dir          = "${jenkins::job_dir}/${jobname}"
   $config_path      = "${job_dir}/config.xml"
 
   # Temp file to use as stdin for Jenkins CLI executable

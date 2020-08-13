@@ -21,17 +21,20 @@ class jenkins::cli::config(
   Optional[String] $ssh_private_key_content       = undef,
 ) {
 
-  if str2bool($::is_pe) {
+  if str2bool($facts['is_pe']) {
     $gem_provider = 'pe_gem'
-  } elsif $::puppetversion
-      and (versioncmp($::puppetversion, '4.0.0') >= 0)
-      and $::rubysitedir
-      and ('/opt/puppetlabs/puppet/lib/ruby' in $::rubysitedir) {
+    # lint:ignore:legacy_facts
+  } elsif $facts['rubysitedir'] and ('/opt/puppetlabs/puppet/lib/ruby' in $facts['rubysitedir']) {
+    # lint:endignore
     # AIO puppet
     $gem_provider = 'puppet_gem'
   } else {
     $gem_provider = 'gem'
   }
+
+  # lint:ignore:legacy_facts
+  $is_root = $facts['id'] == 'root'
+  # lint:endignore
 
   # required by PuppetX::Jenkins::Provider::Clihelper base
   if ! defined(Package['retries']) {
@@ -49,7 +52,7 @@ class jenkins::cli::config(
     }
 
     # allow this class to be included when not running as root
-    if $::id == 'root' {
+    if $is_root {
       File[$ssh_private_key] {
         # the owner/group should probably be set externally and retrieved if
         # present in the manfiest. At present, there is no authoritative place
@@ -60,7 +63,7 @@ class jenkins::cli::config(
     }
   }
 
-  # We manage the password file, to avoid printing username/password in the 
+  # We manage the password file, to avoid printing username/password in the
   # ps ax output.
   # If file exists, we assume the user manages permissions and content
   if $cli_username and $cli_password and !$cli_password_file_exists {
@@ -72,7 +75,7 @@ class jenkins::cli::config(
     }
 
     # allow this class to be included when not running as root
-    if $::id == 'root' {
+    if $is_root {
       File[$cli_password_file] {
         # the owner/group should probably be set externally and retrieved if
         # present in the manfiest. At present, there is no authoritative place

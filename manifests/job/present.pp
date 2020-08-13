@@ -16,8 +16,8 @@ define jenkins::job::present(
   Boolean $replace              = true,
 ){
 
-  include ::jenkins::cli
-  include ::jenkins::cli::reload
+  include jenkins::cli
+  include jenkins::cli::reload
 
   if $config_file and $config {
     fail('You cannot set both $config_file AND $config param, only one is required')
@@ -62,12 +62,12 @@ define jenkins::job::present(
     }
   }
 
-  $job_dir            = "${::jenkins::job_dir}/${jobname}"
+  $job_dir            = "${jenkins::job_dir}/${jobname}"
   $config_path        = "${job_dir}/config.xml"
 
   # Bring variables from Class['::jenkins'] into local scope.
-  $cli_tries          = $::jenkins::cli_tries
-  $cli_try_sleep   = $::jenkins::cli_try_sleep
+  $cli_tries          = $jenkins::cli_tries
+  $cli_try_sleep   = $jenkins::cli_try_sleep
 
   Exec {
     logoutput   => false,
